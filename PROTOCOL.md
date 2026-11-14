@@ -1,0 +1,61 @@
+# Companion protocol
+
+How KnobDeck's plugins talk to the companions. Every companion speaks the same small HTTP dialect,
+so a new one (for another editor or app) can reuse the Rust side unchanged.
+
+| Companion | KnobDeck plugin | Default port | Settings in the plugin's `.env` |
+|---|---|---|---|
+| VS Code (`vscode/`) | `vscode` | `32145` | `VSCODE_HOST`, `VSCODE_PORT`, `VSCODE_PASSWORD` |
+| IntelliJ (`intellij/`) | `intellij` | `21420` | `IDEA_HOST`, `IDEA_PORT`, `IDEA_PASSWORD` |
+
+## Transport
+
+- HTTP/1.1 on `127.0.0.1` only. Every request is a `GET` (except the VS Code window handoff).
+- **Password**: when one is set, the request carries it verbatim in `Authorization` (no scheme).
+  A wrong or missing password is `401` (VS Code) or `403` (IntelliJ); KnobDeck treats both as
+  "wrong password" and asks the user to run setup again.
+- **Web pages are refused** with `403`: any request with an `Origin` or `Sec-Fetch-*` header, or a
+  `Host` other than `127.0.0.1` / `localhost` / `[::1]` on the server's own port. KnobDeck sends
+  none of these. This keeps a website from driving the editor through the user's browser, even
+  with no password set.
+- Responses are JSON. Errors are `{"ok": false, "error": "<message for the user>"}`; KnobDeck shows
+  the message on the button.
+
+## Endpoints
+
+| Request | Answer |
+|---|---|
+| `GET /health` | `200 {"ok": true, "app": "...", "version": "...", ...}`. Setup calls this to check the connection. |
+| `GET /api/action/<id>[?name=…\|?uri=…]` | `200 {"ok": true}` once the action ran; `200 {"ok": true, "pending": true}` (VS Code) or `202` (IntelliJ) if it is still running or queued after ~5 s; `400` missing parameter; `404` unknown action / task / configuration / terminal; `409` not possible right now (e.g. Step Over with no debug session); `500` anything else. `<id>` is percent-encoded. |
+| `GET /api/query/<name>` | `200 {"items": [{"value": "...", "label": "..."}]}` |
+
+### VS Code action ids
+
+`vscode.openCommandPalette`, `vscode.quickOpen`, `vscode.explorer`, `vscode.search`,
+`vscode.sourceControl`, `vscode.extensions`, `vscode.toggleTerminal`, `vscode.problems`,
+`vscode.saveAll`, `vscode.formatDocument`, `vscode.toggleSidebar`, `vscode.togglePanel`,
+`vscode.zenMode`, `vscode.splitEditor`, `vscode.newTerminal`, `vscode.stopDebugging`;
+`vscode.runTask?name=`, `vscode.startDebugging?name=` (launch configuration or compound),
+`vscode.focusTerminal?name=`, `vscode.openEditor?uri=`. Any other id runs that VS Code command
+with no arguments (KnobDeck's Custom Command).
+
+Queries: `tasks`, `launch-configs`, `terminals`, `open-editors`.
+
+**Several windows.** Each VS Code window runs the companion, and one holds the port. A window that
+gains focus sends `POST /api/handoff` with `X-KnobDeck-Companion: handoff` (and the password); the
+holder answers `200` and closes its server, and the focused window binds the port.
+
+### IntelliJ action ids
+
+Any IDE action id (`SearchEverywhere`, `StepOver`, …; **Tools → KnobDeck: Copy an Action ID…** lists
+them). `Run?name=<configuration>` / `Debug?name=<configuration>` start that run configuration in the
+last focused project; without `name` they act like the toolbar buttons. `KnobDeck.ShowActionBrowser`
+opens the action ID browser (`streamdeck.show.action.browser`, sent by early KnobDeck builds, is an
+alias).
+
+Queries: `run-configs`.
+
+## Compatibility
+
+Ids and query names are a contract with released KnobDeck plugins: add, never rename or remove.
+`compat/` drives the real Rust plugins against the companions in CI.
