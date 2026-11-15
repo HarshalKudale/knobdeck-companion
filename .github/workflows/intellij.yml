@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          repository: HarshalKudale/knobdeck-plugins
+          repository: Knobdeck/knobdeck-plugins
           ref: ${{ inputs.plugins_ref || 'master' }}
           path: knobdeck-plugins
       - uses: dtolnay/rust-toolchain@stable

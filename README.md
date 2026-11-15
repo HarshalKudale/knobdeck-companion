@@ -2,7 +2,7 @@
 
 Small add-ons that run *inside* other apps so [KnobDeck](https://knobdeck.harshalkudale.com) can
 control them through a real interface instead of keyboard shortcuts. Each one exposes a local action
-server that a KnobDeck plugin from [knobdeck-plugins](https://github.com/HarshalKudale/knobdeck-plugins)
+server that a KnobDeck plugin from [knobdeck-plugins](https://github.com/Knobdeck/knobdeck-plugins)
 talks to.
 
 | Companion | Runs in | KnobDeck plugin | Store |
