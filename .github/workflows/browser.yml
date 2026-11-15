@@ -1,0 +1,75 @@
+name: Browser companion
+
+on:
+  push:
+    branches: [master]
+    paths: ["browser/**", "compat/**", ".github/workflows/browser.yml"]
+    tags: ["browser-v*"]
+  pull_request:
+    paths: ["browser/**", "compat/**", ".github/workflows/browser.yml"]
+  workflow_dispatch:
+    inputs:
+      plugins_ref:
+        description: knobdeck-plugins branch or tag to test against
+        default: master
+
+defaults:
+  run:
+    working-directory: browser
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      # The KnobDeck `browser-plugin`, built from source, so the tests drive the real thing.
+      - uses: actions/checkout@v4
+        with:
+          repository: Knobdeck/knobdeck-plugins
+          ref: ${{ inputs.plugins_ref || 'master' }}
+          path: knobdeck-plugins
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: knobdeck-plugins
+      - name: Build the KnobDeck browser-plugin
+        working-directory: knobdeck-plugins
+        run: cargo build --release -p browser-plugin
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test (drives the real KnobDeck plugin)
+        shell: bash
+        env:
+          PLUGINS: ${{ github.workspace }}/knobdeck-plugins
+        run: |
+          exe="$PLUGINS/target/release/browser-plugin"
+          [ -f "$exe.exe" ] && exe="$exe.exe"
+          KNOBDECK_BROWSER_PLUGIN="$exe" npm test
+
+  package:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check the tag matches the version
+        if: startsWith(github.ref, 'refs/tags/browser-v')
+        run: test "browser-v$(node -p "require('./package.json').version")" = "${GITHUB_REF_NAME}"
+      - run: npm run package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: knobdeck-browser-companion
+          path: browser/dist/*.zip
+      - name: GitHub release
+        if: startsWith(github.ref, 'refs/tags/browser-v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" dist/*.zip --title "Browser companion ${GITHUB_REF_NAME#browser-v}" --generate-notes

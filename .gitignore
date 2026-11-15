@@ -9,3 +9,4 @@ intellij/.kotlin/
 .idea/
 *.iml
 .DS_Store
+browser/dist/

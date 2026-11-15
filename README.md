@@ -1,14 +1,16 @@
 # KnobDeck companions
 
 Small add-ons that run *inside* other apps so [KnobDeck](https://knobdeck.harshalkudale.com) can
-control them through a real interface instead of keyboard shortcuts. Each one exposes a local action
-server that a KnobDeck plugin from [knobdeck-plugins](https://github.com/Knobdeck/knobdeck-plugins)
+control them through a real interface instead of keyboard shortcuts. The editor companions expose a
+local action server; the browser extension connects out to the plugin's local server instead (a
+browser extension can't listen). Either way a KnobDeck plugin from [knobdeck-plugins](https://github.com/Knobdeck/knobdeck-plugins)
 talks to.
 
 | Companion | Runs in | KnobDeck plugin | Store |
 |---|---|---|---|
 | [`vscode/`](vscode) — KnobDeck VS Code Companion | VS Code, VSCodium, Cursor, Windsurf | `vscode` | Visual Studio Marketplace, Open VSX |
 | [`intellij/`](intellij) — KnobDeck Companion | IntelliJ IDEA, Android Studio, PyCharm, WebStorm and other JetBrains IDEs (2024.3+) | `intellij` | JetBrains Marketplace |
+| [`browser/`](browser) — KnobDeck Browser Companion | Chrome, Edge, Brave and other Chromium browsers; Firefox, Zen | `browser-plugin` | GitHub releases (stores not set up yet) |
 
 - [PROTOCOL.md](PROTOCOL.md): the HTTP interface the plugins rely on. Ids are a contract: add,
   never rename.
