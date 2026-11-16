@@ -1,0 +1,9 @@
+[submodule "vscode"]
+	path = vscode
+	url = https://github.com/Knobdeck/knobdeck-vscode-companion.git
+[submodule "intellij"]
+	path = intellij
+	url = https://github.com/Knobdeck/knobdeck-intellij-companion.git
+[submodule "browser"]
+	path = browser
+	url = https://github.com/Knobdeck/knobdeck-browser-companion.git
