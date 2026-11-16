@@ -86,11 +86,12 @@ export class PluginDriver {
     if (!ready.done) throw new Error("plugin did not promise done frames");
   }
 
-  /** Presses an action (or a wheel child). Resolves after the handler finishes. */
-  async invoke(actionId, inputs = {}, { childId, ms = 15000 } = {}) {
+  /** Presses an action (or a wheel child; `trigger: "adjust"` turns a slider, with `value` / `delta` in `inputs`).
+   *  Resolves after the handler finishes. */
+  async invoke(actionId, inputs = {}, { childId, trigger = "press", ms = 15000 } = {}) {
     const id = `i${++this.#seq}`;
     const instance_id = `inst-${id}`;
-    const msg = { type: "invoke", id, instance_id, action_id: actionId, trigger: "press", inputs };
+    const msg = { type: "invoke", id, instance_id, action_id: actionId, trigger, inputs };
     if (childId !== undefined) msg.child_id = childId;
     const done = this.#await(id, ms);
     this.#send(msg);

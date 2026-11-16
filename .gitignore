@@ -1,10 +1,4 @@
 node_modules/
-.vscode-test/
-*.vsix
-intellij/.gradle/
-intellij/build/
-intellij/.intellijPlatform/
-intellij/.kotlin/
 .idea/
 *.iml
 .DS_Store

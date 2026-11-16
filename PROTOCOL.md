@@ -6,7 +6,8 @@ so a new one (for another editor or app) can reuse the Rust side unchanged.
 | Companion | KnobDeck plugin | Default port | Settings in the plugin's `.env` |
 |---|---|---|---|
 | VS Code ([knobdeck-vscode-companion](https://github.com/Knobdeck/knobdeck-vscode-companion)) | `vscode` | `32145` | `VSCODE_HOST`, `VSCODE_PORT`, `VSCODE_PASSWORD` |
-| IntelliJ (`intellij/`) | `intellij` | `21420` | `IDEA_HOST`, `IDEA_PORT`, `IDEA_PASSWORD` |
+| IntelliJ ([knobdeck-intellij-companion](https://github.com/Knobdeck/knobdeck-intellij-companion)) | `intellij` | `21420` | `IDEA_HOST`, `IDEA_PORT`, `IDEA_PASSWORD` |
+| Browser ([knobdeck-browser-companion](https://github.com/Knobdeck/knobdeck-browser-companion)) | `browser-plugin` | `32147` | `BROWSER_PORT` (see [Browser extension](#browser-extension): the direction is reversed) |
 
 ## Transport
 
@@ -66,7 +67,31 @@ KnobDeck versions. On the hub, the VS Code companion takes the same action ids a
 `/api/action/<id>` (parameters as an object, e.g. `{"name": "build"}`), `query` with `{"name": …}`
 for the lists, and sends a `window_focused` event when its window gains focus.
 
+## Browser extension
+
+The one companion that dials the plugin instead of listening, because a browser extension can't open
+a port. `browser-plugin` listens on `127.0.0.1:32147` (`BROWSER_PORT`); each browser's extension
+connects with a WebSocket and the plugin lists the connected ones as the Browser choices.
+
+- **Web pages are refused**: the handshake needs an `Origin` of `chrome-extension://…` or
+  `moz-extension://…` and a `Host` of `127.0.0.1` / `localhost` / `[::1]` on that port (`403`
+  otherwise). No password: nothing but a local program that fakes an extension origin can connect.
+- Messages are JSON text frames.
+  - Extension → plugin, first: `{"type":"hello","protocol":1,"id":"<per-profile uuid>","browser":"chrome|msedge|brave|firefox|zen|opera","name":"Chrome","family":"chromium|firefox","version":"1.0.0"}`.
+    The plugin answers `{"type":"ready","protocol":1}`. A reconnect with the same `id` replaces the old link.
+  - Extension → plugin, every 20 s: `{"type":"ping"}`, answered `{"type":"pong"}`. The plugin drops a link silent for 75 s.
+  - Plugin → extension: `{"id":<n>,"action":"<id>","params":{…}}`. Answer: `{"id":<n>,"ok":true,"result":{…}}`,
+    or `{"id":<n>,"ok":false,"error":"<message for the user>"}`, or `{"id":<n>,"ok":false,"unsupported":true}`
+    when the browser has no API for it (the plugin may then send a shortcut instead).
+- Actions: the plugin's action ids `new-tab`, `new-window`, `new-private-window`, `close-tab`,
+  `reopen-closed-tab`, `next-tab`, `previous-tab`, `reload-tab`, `hard-reload-tab`, `go-back`,
+  `go-forward`, `stop-loading`, `print-page`, `toggle-fullscreen`, `bookmark-page`, `open-downloads`,
+  `open-history`, `open-bookmarks-manager`; `open-url` (`url`), `custom-keybind` (`keys`, KnobDeck key
+  names), `zoom-set` / `zoom-by` (`percent`; answer `{"percent": n}`), `bookmarks` / `history`
+  (answer `{"items":[{"title","url"}]}`, 16 newest). Always on the active tab of the last used window.
+- `focus-address-bar`, `find-in-page` and `save-page` are answered `unsupported` by every browser.
+
 ## Compatibility
 
 Ids and query names are a contract with released KnobDeck plugins: add, never rename or remove.
-`compat/` drives the real Rust plugins against the companions in CI.
+Each companion's CI drives the real Rust plugin against it with a copy of [`compat/`](compat).
