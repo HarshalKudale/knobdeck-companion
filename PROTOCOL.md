@@ -55,6 +55,17 @@ alias).
 
 Queries: `run-configs`.
 
+## Companion hub (current KnobDeck)
+
+Current KnobDeck runs one **companion hub** that companions dial instead of opening a port:
+KnobDeck's own contract, specified in
+[knobdeck-sdk/knobdeck-protocol/REFERENCE.md](https://github.com/Knobdeck/knobdeck-sdk/blob/master/knobdeck-protocol/REFERENCE.md)
+and implemented by the [`@knobdeck/companion`](https://www.npmjs.com/package/@knobdeck/companion)
+client. The VS Code companion (1.1+) links there first; the HTTP dialect above stays for older
+KnobDeck versions. On the hub, the VS Code companion takes the same action ids as
+`/api/action/<id>` (parameters as an object, e.g. `{"name": "build"}`), `query` with `{"name": …}`
+for the lists, and sends a `window_focused` event when its window gains focus.
+
 ## Compatibility
 
 Ids and query names are a contract with released KnobDeck plugins: add, never rename or remove.
