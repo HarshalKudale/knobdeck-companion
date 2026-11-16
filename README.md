@@ -15,7 +15,7 @@ clone.
 |---|---|---|---|---|
 | KnobDeck VS Code Companion | [knobdeck-vscode-companion](https://github.com/Knobdeck/knobdeck-vscode-companion) ([`vscode/`](vscode)) | VS Code, VSCodium, Cursor, Windsurf | `vscode` | Visual Studio Marketplace, Open VSX |
 | KnobDeck Companion for JetBrains IDEs | [knobdeck-intellij-companion](https://github.com/Knobdeck/knobdeck-intellij-companion) ([`intellij/`](intellij)) | IntelliJ IDEA, Android Studio, PyCharm, WebStorm and other JetBrains IDEs (2024.3+) | `intellij` | JetBrains Marketplace |
-| KnobDeck Browser Companion | [knobdeck-browser-companion](https://github.com/Knobdeck/knobdeck-browser-companion) ([`browser/`](browser)) | Chrome, Edge, Brave and other Chromium browsers; Firefox, Zen | `browser-plugin` | Chrome Web Store, Microsoft Edge Add-ons, addons.mozilla.org |
+| KnobDeck Browser Companion | [knobdeck-browser-companion](https://github.com/Knobdeck/knobdeck-browser-companion) ([`browser/`](browser)) | Chrome, Edge, Brave and other Chromium browsers; Firefox, Zen | `browser-plugin` | Chrome Web Store (also for Edge, Brave), addons.mozilla.org |
 
 - [PROTOCOL.md](PROTOCOL.md): how the plugins talk to the companions. Ids are a contract: add,
   never rename.
