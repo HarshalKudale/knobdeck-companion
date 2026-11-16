@@ -1,7 +1,6 @@
 node_modules/
 .vscode-test/
 *.vsix
-vscode/test/e2e/workspace/out/*.marker
 intellij/.gradle/
 intellij/build/
 intellij/.intellijPlatform/

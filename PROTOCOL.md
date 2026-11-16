@@ -5,7 +5,7 @@ so a new one (for another editor or app) can reuse the Rust side unchanged.
 
 | Companion | KnobDeck plugin | Default port | Settings in the plugin's `.env` |
 |---|---|---|---|
-| VS Code (`vscode/`) | `vscode` | `32145` | `VSCODE_HOST`, `VSCODE_PORT`, `VSCODE_PASSWORD` |
+| VS Code ([knobdeck-vscode-companion](https://github.com/Knobdeck/knobdeck-vscode-companion)) | `vscode` | `32145` | `VSCODE_HOST`, `VSCODE_PORT`, `VSCODE_PASSWORD` |
 | IntelliJ (`intellij/`) | `intellij` | `21420` | `IDEA_HOST`, `IDEA_PORT`, `IDEA_PASSWORD` |
 
 ## Transport
